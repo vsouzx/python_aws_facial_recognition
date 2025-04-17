@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "avaliacoes_gw_api"{
-    name = "avaliacoes_gw_api"
+    name = "facial_recognition_api"
     description = "REST API for lambda"
 
     endpoint_configuration {
@@ -9,7 +9,7 @@ resource "aws_api_gateway_rest_api" "avaliacoes_gw_api"{
 
 resource "aws_api_gateway_resource" "avaliacoes_gw_api_resource" {
     parent_id       = aws_api_gateway_rest_api.avaliacoes_gw_api.root_resource_id
-    path_part       = "avaliacoes"
+    path_part       = "authentication"
     rest_api_id     = aws_api_gateway_rest_api.avaliacoes_gw_api.id
 }
 
