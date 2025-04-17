@@ -80,7 +80,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
             aws_api_gateway_method.register_gw_api_method_post.id,
             aws_api_gateway_method.authentication_gw_api_method_get.id,
             aws_api_gateway_integration.register_lambda_integration_post.id,
-            aws_api_gateway_integration.authentication_lambda_integration_get.id,
+            aws_api_gateway_integration.authentication_lambda_integration_post.id,
         ]))
     }
 
@@ -90,7 +90,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
 
     depends_on = [ 
         aws_api_gateway_integration.register_lambda_integration_post,
-        aws_api_gateway_integration.authentication_lambda_integration_get
+        aws_api_gateway_integration.authentication_lambda_integration_post
     ]
 }
 
