@@ -52,7 +52,7 @@ resource "aws_api_gateway_method" "authentication_gw_api_method_get" {
     rest_api_id     = aws_api_gateway_rest_api.facial_recognition_gw_api.id
 }
 
-resource "aws_api_gateway_integration" "lambda_integration_get" {
+resource "aws_api_gateway_integration" "authentication_lambda_integration_post" {
     http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
     resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id
     rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
