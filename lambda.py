@@ -1,20 +1,33 @@
-import boto3
-import os
 from decimal import Decimal
-from boto3.dynamodb.conditions import Attr
-
-try:
-    # Tentar obter o valor da variável de ambiente
-    table_name = os.environ['DYNAMODB_TABLE']
-except KeyError:
-    # Lançar uma exceção personalizada se a variável não estiver configurada
-    raise EnvironmentError("A variável de ambiente 'DYNAMODB_TABLE' não está configurada.")
-
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(table_name)
+import json
 
 def lambda_handler(event, context):
-    return "lambda ok"
+    print(f'Event: {event}')
+
+    http_method = event['httpMethod']
+    path = event['path']
+
+    if http_method == 'POST':
+        if path == '/register':
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'message': 'User created'})
+            }
+        elif path == '/authentication':
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'message': 'User authenticated'})
+            }
+        else:
+            return {
+                'statusCode': 404,
+                'body': json.dumps({'error': 'Path not found'})
+            }
+    #estive aqui
+    return {
+        'statusCode': 405,
+        'body': json.dumps('Method not allowed')
+    }
 
 #decimal utils
 def decimal_default(obj):

@@ -38,6 +38,20 @@ resource "aws_api_gateway_method_response" "register_response_200_post" {
   status_code = "200"
 }
 
+resource "aws_api_gateway_method_response" "register_response_405_post" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.register_gw_api_resource.id
+  http_method = aws_api_gateway_method.register_gw_api_method_post.http_method
+  status_code = "405"
+}
+
+resource "aws_api_gateway_method_response" "register_response_404_post" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.register_gw_api_resource.id
+  http_method = aws_api_gateway_method.register_gw_api_method_post.http_method
+  status_code = "404"
+}
+
 ### AUTHENTICATE ENDPOINT ###
 resource "aws_api_gateway_resource" "authentication_gw_api_resource" {
     parent_id       = aws_api_gateway_rest_api.facial_recognition_gw_api.root_resource_id
@@ -67,6 +81,20 @@ resource "aws_api_gateway_method_response" "authentication_response_200_post" {
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
   http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
   status_code = "200"
+}
+
+resource "aws_api_gateway_method_response" "authentication_response_404_post" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
+  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
+  status_code = "405"
+}
+
+resource "aws_api_gateway_method_response" "authentication_response_405_post" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
+  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
+  status_code = "404"
 }
 
 ###############
