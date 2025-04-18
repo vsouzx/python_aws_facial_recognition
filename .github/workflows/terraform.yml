@@ -25,6 +25,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Instalar dependências da Lambda e empacotar
+        run: |
+          rm -rf package lambda.zip
+          mkdir -p package
+          pip install -r requirements.txt -t package
+          cp lambda.py requirements.txt package/
+          cp -r app package/
+          cd package
+          zip -r ../lambda.zip .
+          cd ..
+      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with: 
