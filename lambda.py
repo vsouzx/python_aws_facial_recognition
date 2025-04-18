@@ -12,13 +12,13 @@ def lambda_handler(event, context):
             'body': json.dumps({'message': 'User created'})
         }
     elif path == '/authentication':
-        content_type = event['headers'].get('Content-Type') or event['headers'].get('content-type')
+        # content_type = event['headers'].get('Content-Type') or event['headers'].get('content-type')
         
-        if not content_type.startswith('multipart/form-data'):
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'message': 'Content-Type inválido. Esperado: multipart/form-data'})
-            }
+        # if not content_type.startswith('multipart/form-data'):
+        #     return {
+        #         'statusCode': 400,
+        #         'body': json.dumps({'message': 'Content-Type inválido. Esperado: multipart/form-data'})
+        #     }
         
         return {
             'statusCode': 200,
