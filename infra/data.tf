@@ -11,8 +11,8 @@ data "aws_iam_policy_document" "assume_role"{
     }
 }
 
-data "archive_file" "lambda"{
-    type        = "zip"
-    source_file = "${path.module}/../lambda.py"
-    output_path = "lambda.zip"
+data "archive_file" "lambda" {
+  type        = "zip"
+  source_file = "${path.module}/lambda.zip"
+  output_path = "${path.module}/lambda.zip"
 }
