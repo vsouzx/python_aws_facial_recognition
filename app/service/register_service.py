@@ -34,17 +34,7 @@ def register_new_user(event):
                 'body': json.dumps({'message': 'Required fields: name, last_name, email and photo'})
             }
 
-        # Remover prefixo se houver
-        if ',' in photo_base64:
-            photo_base64 = photo_base64.split(',')[1]
-
-        try:
-            photo_bytes = base64.b64decode(photo_base64)
-        except Exception as e:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'message': 'Invalid base64.'})
-            }
+        photo_bytes = validate_base64(photo_base64)
 
         try:
             is_human_face = is_face(photo_bytes)
@@ -75,34 +65,9 @@ def register_new_user(event):
             ContentType='image/png'
         )
 
-        # Criar coleção, se não existir
-        try:
-            rekognition.create_collection(CollectionId=collection_id)
-        except ClientError as e:
-            if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
-                return {
-                    'statusCode': 500,
-                    'body': json.dumps({'message': f'Error creating collection: {e}'})
-                }
+        create_collection_if_not_exists()
                 
-         # Indexar o rosto na coleção
-        try:
-            rekognition.index_faces(
-                CollectionId=collection_id,
-                Image={
-                    'S3Object': {
-                        'Bucket': bucket_name,
-                        'Name': identifier
-                    }
-                },
-                ExternalImageId=identifier,
-                DetectionAttributes=['ALL']
-            )
-        except Exception as e:
-            return {
-                'statusCode': 500,
-                'body': json.dumps({'message': f'Error indexing face: {e}'})
-            }
+        index_faces(identifier)
             
         save_item({
             'identifier': identifier,
@@ -122,22 +87,54 @@ def register_new_user(event):
             'statusCode': 500,
             'body': json.dumps({'message': f'Erro while saving new user: {e}'})
         }
-        
-def find_user_by_image(event):
-    return {
-            'statusCode': 200,
-            'body': json.dumps({'message': 'User authenticated'})
-        }
-    
-def is_face(photo_bytes):
-    print('iniciando deteccao face')
+  
+def index_faces(identifier):
     try:
-        response = rekognition.detect_faces(
+        rekognition.index_faces(
+            CollectionId=collection_id,
+            Image={
+                'S3Object': {
+                    'Bucket': bucket_name,
+                    'Name': identifier
+                }
+            },
+            ExternalImageId=identifier,
+            DetectionAttributes=['ALL']
+        )
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'message': f'Error indexing face: {e}'})
+        }
+              
+def create_collection_if_not_exists():
+    try:
+        rekognition.create_collection(CollectionId=collection_id)
+    except ClientError as e:
+        if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': f'Error creating collection: {e}'})
+            }
+
+def validate_base64(photo_base64):
+    if ',' in photo_base64:
+        photo_base64 = photo_base64.split(',')[1]
+
+    try:
+        return base64.b64decode(photo_base64)
+    except Exception as e:
+        print(f'Erro ao validar base64 {e}')
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'message': 'Invalid base64.'})
+        }
+
+def is_face(photo_bytes):
+    response = rekognition.detect_faces(
         Image={'Bytes': photo_bytes},
         Attributes=['ALL']
     )
-    except Exception as e:
-        print(f'Erro ao detectar faceeeeeeeeee {e}')
     
     print(f'Response deteccao face: {response}')
     faces = response.get('FaceDetails', [])
