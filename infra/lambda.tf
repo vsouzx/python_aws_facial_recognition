@@ -34,6 +34,13 @@ resource "aws_iam_policy" "lambda_logging" {
                 ],
                 "Resource": "arn:aws:s3:::s-facial-recognition-bucket/*",
                 "Effect": "Allow"
+            },
+            {
+                "Action": [
+                    "rekognition:*"
+                ],
+                "Resource": "*",
+                "Effect": "Allow"
             }
         ]
     }

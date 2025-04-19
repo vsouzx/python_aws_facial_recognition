@@ -27,7 +27,6 @@ def register_new_user(event):
         email = data.get('email')
         print(f'Email: {email}' )
         photo_base64 = data.get('photo')
-        print(f'Photo Base64: {photo_base64}' )
 
         if not all([name, last_name, email, photo_base64]):
             return {
@@ -57,7 +56,7 @@ def register_new_user(event):
                 }
             return {
                 'statusCode': 400,
-                'body': json.dumps({'message': 'Error in face detection.'})
+                'body': json.dumps({'message': f'Error in face detection. {e}'})
             }
 
         if not is_human_face:
