@@ -28,11 +28,11 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.13.3
+          python-version: 3.1
 
       - name: Instalar dependências da Lambda e empacotar
         run: |
-          rm -rf package lambda.zip
+          rm -rf package lambda.zip infra/lambda.zip
           mkdir -p package
           pip install -r requirements.txt -t package
           cp lambda.py requirements.txt package/
@@ -40,6 +40,7 @@ jobs:
           cd package
           zip -r ../lambda.zip .
           cd ..
+          mv lambda.zip infra/
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
