@@ -10,9 +10,10 @@ s3 = boto3.client('s3')
 try:
     # Tentar obter o valor da variável de ambiente
     table_name = os.environ['DYNAMODB_TABLE']
+    bucket_name = os.environ['BUCKET_NAME']
 except KeyError:
     # Lançar uma exceção personalizada se a variável não estiver configurada
-    raise EnvironmentError("A variável de ambiente 'DYNAMODB_TABLE' não está configurada.")
+    raise EnvironmentError("A variável de ambiente não está configurada.")
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(table_name)
@@ -70,13 +71,21 @@ def lambda_handler(event, context):
                 'body': json.dumps('Todos os campos são obrigatórios.')
             }
         
-        item={
-            'identifier': str(uuid.uuid4()),
-            'nome': nome
-        }
+        uuid = str(uuid.uuid4())
         
+        # S3 - upload da imagem
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=f'{uuid}.jpg',
+            Body=photo['content'],
+            ContentType='image/jpeg'
+        )
+
         # DynamoDB - salvar dados
-        table.put_item(Item=item)
+        table.put_item(Item={
+            'identifier': uuid,
+            'nome': nome
+        })
 
         return {
             'statusCode': 200,

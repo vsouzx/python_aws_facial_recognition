@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "s_facial_recognition_bucket" {
-  bucket = "s-facial-recognition-bucket"
+  bucket = var.bucket_name
   force_destroy = true
 
   tags = {

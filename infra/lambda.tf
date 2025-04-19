@@ -50,6 +50,7 @@ resource "aws_lambda_function" "lambda" {
     variables = {
       API_GATEWAY_URL = var.api_gateway_url
       DYNAMODB_TABLE  = var.dynamo_table
+      BUCKET_NAME = var.bucket_name
     }
   }
 }
