@@ -39,16 +39,14 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 }
 
 resource "aws_lambda_function" "lambda" {
-    filename           = "lambda.zip"
-    function_name      = "facial_recognition_lambda"
-    role               = aws_iam_role.iam_for_lambda.arn
+  function_name    = "facial_recognition_lambda"
+  role             = aws_iam_role.iam_for_lambda.arn
+  runtime          = "python3.10"
+  handler          = "lambda.lambda_handler"
+  filename         = "lambda.zip"
+  source_code_hash = filebase64sha256("${path.module}/lambda.zip")
 
-    source_code_hash = filebase64sha256("lambda.zip")
-    
-    runtime            = "python3.10"
-    handler            = "lambda.lambda_handler"
-
-    environment {
+  environment {
     variables = {
       API_GATEWAY_URL = var.api_gateway_url
       DYNAMODB_TABLE  = var.dynamo_table
