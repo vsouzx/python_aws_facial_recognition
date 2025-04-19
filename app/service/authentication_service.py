@@ -4,6 +4,7 @@ import os
 import base64
 from app.repository.users_repository import find_by_identifier, save_item
 from datetime import datetime
+from app.util.decimal_utils import decimal_default
 
 s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
@@ -91,7 +92,7 @@ def authenticate(event):
                 'email': user['email'],
                 'access_count': user['access_count'],
                 'confidence': confidence
-            })
+            }, default=decimal_default)
         }
     except Exception as e:
         return {
