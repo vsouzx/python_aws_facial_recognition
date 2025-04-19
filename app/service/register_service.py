@@ -54,9 +54,10 @@ def register_new_user(event):
                     'statusCode': 400,
                     'body': json.dumps({'message': 'More than one face detected.'})
                 }
+            print(f'Error in face detection: {e}')
             return {
                 'statusCode': 400,
-                'body': json.dumps({'message': f'Error in face detection. {e}'})
+                'body': json.dumps({'message': 'Error in face detection.'})
             }
 
         if not is_human_face:
@@ -108,7 +109,7 @@ def register_new_user(event):
             'name': name,
             'last_name': last_name,
             'email': email,
-            'last_access': datetime.now(),
+            'last_access': str(datetime.now()),
             'access_count': 0
         })
 
@@ -129,12 +130,19 @@ def find_user_by_image(event):
         }
     
 def is_face(photo_bytes):
-    response = rekognition.detect_faces(
+    print('iniciando deteccao face')
+    try:
+        response = rekognition.detect_faces(
         Image={'Bytes': photo_bytes},
         Attributes=['ALL']
     )
+    except Exception as e:
+        print(f'Erro ao detectar faceeeeeeeeee {e}')
+    
+    print(f'Response deteccao face: {response}')
     faces = response.get('FaceDetails', [])
 
+    print(f'Faces: {response}')
     if not faces:
         return False
 
