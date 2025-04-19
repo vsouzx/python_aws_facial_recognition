@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "assume_role"{
 
         principals{
             type        = "Service"
-            identifiers = ["lambda.amazonaws.com","dynamodb.amazonaws.com"]
+            identifiers = ["lambda.amazonaws.com"]
         }
 
         actions = ["sts:AssumeRole"]

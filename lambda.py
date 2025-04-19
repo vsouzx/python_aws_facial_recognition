@@ -71,19 +71,19 @@ def lambda_handler(event, context):
                 'body': json.dumps('Todos os campos são obrigatórios.')
             }
         
-        uuid = str(uuid.uuid4())
+        identifier = str(uuid.uuid4())
         
         # S3 - upload da imagem
         s3.put_object(
             Bucket=bucket_name,
-            Key=f'{uuid}.jpg',
+            Key=f'{identifier}.jpg',
             Body=photo['content'],
             ContentType='image/jpeg'
         )
 
         # DynamoDB - salvar dados
         table.put_item(Item={
-            'identifier': uuid,
+            'identifier': identifier,
             'nome': nome
         })
 
