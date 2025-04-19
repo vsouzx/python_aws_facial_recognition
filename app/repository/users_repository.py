@@ -1,6 +1,5 @@
 import boto3
 import os
-from boto3.dynamodb.conditions import Attr
 
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
@@ -18,3 +17,5 @@ table = dynamodb.Table(table_name)
 def save_item(item):
     table.put_item(Item=item)
 
+def find_by_identifier(identifier):
+    return table.get_item(Key={'identifier': identifier})

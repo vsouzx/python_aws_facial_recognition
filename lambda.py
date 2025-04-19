@@ -1,4 +1,5 @@
-from app.service.register_service import register_new_user, find_user_by_image
+from app.service.register_service import register_new_user
+from app.service.authentication_service import authenticate
 
 def lambda_handler(event, context):
     print(f'Event: {event}')
@@ -8,4 +9,4 @@ def lambda_handler(event, context):
     if path == '/register':
         return register_new_user(event)
     elif path == '/authentication':
-        return find_user_by_image(event)
+        return authenticate(event)
