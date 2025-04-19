@@ -21,3 +21,7 @@ variable "stage_name" {
 variable "log_retention_days" {
     type = number
 }
+
+variable "collection_id" {
+    type = string
+}

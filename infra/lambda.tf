@@ -58,6 +58,7 @@ resource "aws_lambda_function" "lambda" {
       API_GATEWAY_URL = var.api_gateway_url
       DYNAMODB_TABLE  = var.dynamo_table
       BUCKET_NAME = var.bucket_name
+      COLLECTION_ID = var.collection_id
     }
   }
 }

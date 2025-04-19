@@ -4,59 +4,113 @@ import boto3
 import os
 import base64
 from app.repository.users_repository import save_item
+from datetime import datetime
+from botocore.exceptions import ClientError
 
 s3 = boto3.client('s3')
+rekognition = boto3.client('rekognition')
 
 try:
     bucket_name = os.environ['BUCKET_NAME']
+    collection_id = os.environ['COLLECTION_ID']
 except KeyError:
-    raise EnvironmentError("A variável de ambiente não está configurada.")
+    raise EnvironmentError("The environment variable is not configured.")
 
 def register_new_user(event):
     try:
         data = json.loads(event['body'])
     
-        nome = data.get('nome')
-        print(f'Nome: {nome}' )
-        foto_base64 = data.get('photo')
-        print(f'Base64: {foto_base64}' )
+        name = data.get('name')
+        print(f'Name: {name}' )
+        last_name = data.get('last_name')
+        print(f'Last name: {last_name}' )
+        email = data.get('email')
+        print(f'Email: {email}' )
+        photo_base64 = data.get('photo')
+        print(f'Photo Base64: {photo_base64}' )
 
-        if not all([nome, foto_base64]):
+        if not all([name, last_name, email, photo_base64]):
             return {
                 'statusCode': 400,
-                'body': json.dumps({'message': 'Campos obrigatórios: nome e foto_base64'})
+                'body': json.dumps({'message': 'Required fields: name, last_name, email and photo'})
             }
 
-        if not all([nome, foto_base64]):
-            return {
-                'statusCode': 400,
-                'body': json.dumps('Todos os campos são obrigatórios.')
-            }
-        
         # Remover prefixo se houver
-        if ',' in foto_base64:
-            foto_base64 = foto_base64.split(',')[1]
+        if ',' in photo_base64:
+            photo_base64 = photo_base64.split(',')[1]
 
         try:
-            foto_bytes = base64.b64decode(foto_base64)
+            photo_bytes = base64.b64decode(photo_base64)
         except Exception as e:
             return {
                 'statusCode': 400,
-                'body': json.dumps({'message': 'Base64 da imagem inválido'})
+                'body': json.dumps({'message': 'Invalid base64.'})
             }
 
+        try:
+            is_human_face = is_face(photo_bytes)
+        except Exception as e:
+            if str(e) == "MultipleFacesException":
+                return {
+                    'statusCode': 400,
+                    'body': json.dumps({'message': 'More than one face detected.'})
+                }
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Error in face detection.'})
+            }
+
+        if not is_human_face:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'No human face detected or confidence too low.'})
+            }
+            
         identifier = str(uuid.uuid4())
 
         s3.put_object(
             Bucket=bucket_name,
             Key=identifier,
-            Body=foto_bytes,
+            Body=photo_bytes,
             ContentType='image/png'
         )
 
+        # Criar coleção, se não existir
+        try:
+            rekognition.create_collection(CollectionId=collection_id)
+        except ClientError as e:
+            if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
+                return {
+                    'statusCode': 500,
+                    'body': json.dumps({'message': f'Error creating collection: {e}'})
+                }
+                
+         # Indexar o rosto na coleção
+        try:
+            rekognition.index_faces(
+                CollectionId=collection_id,
+                Image={
+                    'S3Object': {
+                        'Bucket': bucket_name,
+                        'Name': identifier
+                    }
+                },
+                ExternalImageId=identifier,
+                DetectionAttributes=['ALL']
+            )
+        except Exception as e:
+            return {
+                'statusCode': 500,
+                'body': json.dumps({'message': f'Error indexing face: {e}'})
+            }
+            
         save_item({
             'identifier': identifier,
-            'nome': nome
+            'name': name,
+            'last_name': last_name,
+            'email': email,
+            'last_access': datetime.now(),
+            'access_count': 0
         })
 
         return {
@@ -66,5 +120,26 @@ def register_new_user(event):
     except Exception as e:
         return {
             'statusCode': 500,
-            'body': json.dumps({'message': f'Erro ao salvar novo usuário: {e}'})
+            'body': json.dumps({'message': f'Erro while saving new user: {e}'})
         }
+        
+def find_user_by_image(event):
+    return {
+            'statusCode': 200,
+            'body': json.dumps({'message': 'User authenticated'})
+        }
+    
+def is_face(photo_bytes):
+    response = rekognition.detect_faces(
+        Image={'Bytes': photo_bytes},
+        Attributes=['ALL']
+    )
+    faces = response.get('FaceDetails', [])
+
+    if not faces:
+        return False
+
+    if len(faces) > 1:
+        raise Exception('MultipleFacesException')
+
+    return faces[0]['Confidence'] > 90
