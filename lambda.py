@@ -1,5 +1,6 @@
 from decimal import Decimal
 import json
+import base64
 
 def lambda_handler(event, context):
     print(f'Event: {event}')
