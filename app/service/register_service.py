@@ -31,6 +31,10 @@ def register_new_user(event):
         if not all([name, last_name, email, photo_base64]):
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'Required fields: name, last_name, email and photo'})
             }
 
@@ -42,17 +46,29 @@ def register_new_user(event):
             if str(e) == "MultipleFacesException":
                 return {
                     'statusCode': 400,
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': '*'
+                    },
                     'body': json.dumps({'message': 'More than one face detected.'})
                 }
             print(f'Error in face detection: {e}')
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'Error in face detection.'})
             }
 
         if not is_human_face:
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'No human face detected or confidence too low.'})
             }
             
@@ -80,6 +96,10 @@ def register_new_user(event):
 
         return {
             'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*'
+            },
             'body': json.dumps({'message': 'User created'})
         }
     except Exception as e:
@@ -104,6 +124,10 @@ def index_faces(identifier):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*'
+            },
             'body': json.dumps({'message': f'Error indexing face: {e}'})
         }
               
@@ -114,6 +138,10 @@ def create_collection_if_not_exists():
         if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
             return {
                 'statusCode': 500,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': f'Error creating collection: {e}'})
             }
 
@@ -127,6 +155,10 @@ def validate_base64(photo_base64):
         print(f'Erro ao validar base64 {e}')
         return {
             'statusCode': 400,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*'
+            },
             'body': json.dumps({'message': 'Invalid base64.'})
         }
 

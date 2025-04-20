@@ -23,6 +23,10 @@ def authenticate(event):
         if not all([photo_base64]):
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'Required fields: photo'})
             }
             
@@ -34,17 +38,29 @@ def authenticate(event):
             if str(e) == "MultipleFacesException":
                 return {
                     'statusCode': 400,
+                    'headers': {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': '*'
+                    },
                     'body': json.dumps({'message': 'More than one face detected.'})
                 }
             print(f'Error in face detection: {e}')
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'Error in face detection.'})
             }
 
         if not is_human_face:
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'No human face detected or confidence too low.'})
             }
             
@@ -60,6 +76,10 @@ def authenticate(event):
         if not matches:
             return {
                 'statusCode': 404,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'Nenhum rosto correspondente encontrado.'})
             }
 
@@ -74,6 +94,10 @@ def authenticate(event):
         if not user:
             return {
                 'statusCode': 404,
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
                 'body': json.dumps({'message': 'Usuário não encontrado no dynamodb'})
             }
 
@@ -97,6 +121,10 @@ def authenticate(event):
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': '*'
+                },
             'body': json.dumps({'message': f'Erro while authenticating user: {e}'})
         }
   
@@ -110,6 +138,10 @@ def validate_base64(photo_base64):
         print(f'Erro ao validar base64 {e}')
         return {
             'statusCode': 400,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*'
+            },
             'body': json.dumps({'message': 'Invalid base64.'})
         }
 
