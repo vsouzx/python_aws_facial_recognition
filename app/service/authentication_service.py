@@ -13,7 +13,7 @@ try:
     bucket_name = os.environ['BUCKET_NAME']
     collection_id = os.environ['COLLECTION_ID']
 except KeyError:
-    raise EnvironmentError("The environment variable is not configured.")
+    raise EnvironmentError('The environment variable is not configured.')
 
 def authenticate(event):
     try:
@@ -25,8 +25,8 @@ def authenticate(event):
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
                 'body': json.dumps({'message': 'Required fields: photo'})
             }
@@ -36,13 +36,13 @@ def authenticate(event):
         try:
             is_human_face = is_face(photo_bytes)
         except Exception as e:
-            if str(e) == "MultipleFacesException":
+            if str(e) == 'MultipleFacesException':
                 return {
                     'statusCode': 400,
                     'headers': {
                         'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Headers': '*',
-                        'Access-Control-Allow-Methods': '*'
+                        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                     },
                     'body': json.dumps({'message': 'More than one face detected.'})
                 }
@@ -51,8 +51,8 @@ def authenticate(event):
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
                 'body': json.dumps({'message': 'Error in face detection.'})
             }
@@ -62,8 +62,8 @@ def authenticate(event):
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
                 'body': json.dumps({'message': 'No human face detected or confidence too low.'})
             }
@@ -82,8 +82,8 @@ def authenticate(event):
                 'statusCode': 404,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
                 'body': json.dumps({'message': 'Nenhum rosto correspondente encontrado.'})
             }
@@ -101,8 +101,8 @@ def authenticate(event):
                 'statusCode': 404,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
                 'body': json.dumps({'message': 'Usuário não encontrado no dynamodb'})
             }
@@ -129,8 +129,8 @@ def authenticate(event):
             'statusCode': 500,
             'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
             'body': json.dumps({'message': f'Erro while authenticating user: {e}'})
         }
@@ -147,8 +147,8 @@ def validate_base64(photo_base64):
             'statusCode': 400,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             'body': json.dumps({'message': 'Invalid base64.'})
         }
