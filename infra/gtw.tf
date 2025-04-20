@@ -203,6 +203,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
             aws_api_gateway_method.authentication_options.id,
             aws_api_gateway_integration.register_lambda_integration_post.id,
             aws_api_gateway_integration.authentication_lambda_integration_post.id,
+            aws_api_gateway_integration.register_options_integration.id
         ]))
     }
 
