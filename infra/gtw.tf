@@ -105,7 +105,7 @@ resource "aws_api_gateway_resource" "authentication_gw_api_resource" {
     rest_api_id     = aws_api_gateway_rest_api.facial_recognition_gw_api.id
 }
 
-resource "aws_api_gateway_method" "authentication_gw_api_method_post" {
+resource "aws_api_gateway_method" "authentication_gw_api_method_get" {
     authorization   = "NONE"
     http_method     = "POST"
     resource_id     = aws_api_gateway_resource.authentication_gw_api_resource.id
@@ -113,7 +113,7 @@ resource "aws_api_gateway_method" "authentication_gw_api_method_post" {
 }
 
 resource "aws_api_gateway_integration" "authentication_lambda_integration_post" {
-    http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
+    http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
     resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id
     rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
     type        = "AWS_PROXY"
@@ -125,21 +125,21 @@ resource "aws_api_gateway_integration" "authentication_lambda_integration_post" 
 resource "aws_api_gateway_method_response" "authentication_response_200_post" {
   rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
-  http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
+  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
   status_code = "200"
 }
 
 resource "aws_api_gateway_method_response" "authentication_response_405_post" {
   rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
-  http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
+  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
   status_code = "405"
 }
 
 resource "aws_api_gateway_method_response" "authentication_response_404_post" {
   rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
-  http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
+  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
   status_code = "404"
 }
 
@@ -199,7 +199,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
             aws_api_gateway_resource.register_gw_api_resource.id, #add mais um
             aws_api_gateway_method.register_gw_api_method_post.id,
             aws_api_gateway_method.register_options.id,
-            aws_api_gateway_method.authentication_gw_api_method_post.id,
+            aws_api_gateway_method.authentication_gw_api_method_get.id,
             aws_api_gateway_method.authentication_options.id,
             aws_api_gateway_integration.register_lambda_integration_post.id,
             aws_api_gateway_integration.authentication_lambda_integration_post.id,
