@@ -33,7 +33,8 @@ def register_new_user(event):
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Methods': '*'
                 },
                 'body': json.dumps({'message': 'Required fields: name, last_name, email and photo'})
             }
@@ -48,7 +49,8 @@ def register_new_user(event):
                     'statusCode': 400,
                     'headers': {
                         'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Headers': '*'
+                        'Access-Control-Allow-Headers': '*',
+                        'Access-Control-Allow-Methods': '*'
                     },
                     'body': json.dumps({'message': 'More than one face detected.'})
                 }
@@ -57,7 +59,8 @@ def register_new_user(event):
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Methods': '*'
                 },
                 'body': json.dumps({'message': 'Error in face detection.'})
             }
@@ -67,7 +70,8 @@ def register_new_user(event):
                 'statusCode': 400,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Methods': '*'
                 },
                 'body': json.dumps({'message': 'No human face detected or confidence too low.'})
             }
@@ -98,13 +102,19 @@ def register_new_user(event):
             'statusCode': 200,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': '*'
             },
             'body': json.dumps({'message': 'User created'})
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             'body': json.dumps({'message': f'Erro while saving new user: {e}'})
         }
   
@@ -126,7 +136,8 @@ def index_faces(identifier):
             'statusCode': 500,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': '*'
             },
             'body': json.dumps({'message': f'Error indexing face: {e}'})
         }
@@ -140,7 +151,8 @@ def create_collection_if_not_exists():
                 'statusCode': 500,
                 'headers': {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': '*'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Methods': '*'
                 },
                 'body': json.dumps({'message': f'Error creating collection: {e}'})
             }
@@ -157,7 +169,8 @@ def validate_base64(photo_base64):
             'statusCode': 400,
             'headers': {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': '*'
             },
             'body': json.dumps({'message': 'Invalid base64.'})
         }

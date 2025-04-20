@@ -52,6 +52,52 @@ resource "aws_api_gateway_method_response" "register_response_404_post" {
   status_code = "404"
 }
 
+resource "aws_api_gateway_method" "register_options" {
+  rest_api_id   = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id   = aws_api_gateway_resource.register_gw_api_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method_response" "register_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.register_gw_api_resource.id
+  http_method = aws_api_gateway_method.register_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration" "register_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.register_gw_api_resource.id
+  http_method = aws_api_gateway_method.register_options.http_method
+  type        = "MOCK"
+  integration_http_method = "OPTIONS"
+  passthrough_behavior    = "WHEN_NO_MATCH"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "register_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.register_gw_api_resource.id
+  http_method = aws_api_gateway_method.register_options.http_method
+  status_code = aws_api_gateway_method_response.register_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+}
+
 ### AUTHENTICATE ENDPOINT ###
 resource "aws_api_gateway_resource" "authentication_gw_api_resource" {
     parent_id       = aws_api_gateway_rest_api.facial_recognition_gw_api.root_resource_id
@@ -59,7 +105,7 @@ resource "aws_api_gateway_resource" "authentication_gw_api_resource" {
     rest_api_id     = aws_api_gateway_rest_api.facial_recognition_gw_api.id
 }
 
-resource "aws_api_gateway_method" "authentication_gw_api_method_get" {
+resource "aws_api_gateway_method" "authentication_gw_api_method_post" {
     authorization   = "NONE"
     http_method     = "POST"
     resource_id     = aws_api_gateway_resource.authentication_gw_api_resource.id
@@ -67,7 +113,7 @@ resource "aws_api_gateway_method" "authentication_gw_api_method_get" {
 }
 
 resource "aws_api_gateway_integration" "authentication_lambda_integration_post" {
-    http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
+    http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
     resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id
     rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
     type        = "AWS_PROXY"
@@ -79,24 +125,69 @@ resource "aws_api_gateway_integration" "authentication_lambda_integration_post" 
 resource "aws_api_gateway_method_response" "authentication_response_200_post" {
   rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
-  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
+  http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
   status_code = "200"
 }
 
 resource "aws_api_gateway_method_response" "authentication_response_405_post" {
   rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
-  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
+  http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
   status_code = "405"
 }
 
 resource "aws_api_gateway_method_response" "authentication_response_404_post" {
   rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
   resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id #trocar
-  http_method = aws_api_gateway_method.authentication_gw_api_method_get.http_method
+  http_method = aws_api_gateway_method.authentication_gw_api_method_post.http_method
   status_code = "404"
 }
 
+resource "aws_api_gateway_method" "authentication_options" {
+  rest_api_id   = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id   = aws_api_gateway_resource.authentication_gw_api_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method_response" "authentication_options_response" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id
+  http_method = aws_api_gateway_method.authentication_options.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration" "authentication_options_integration" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id
+  http_method = aws_api_gateway_method.authentication_options.http_method
+  type        = "MOCK"
+  integration_http_method = "OPTIONS"
+  passthrough_behavior    = "WHEN_NO_MATCH"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "authentication_options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
+  resource_id = aws_api_gateway_resource.authentication_gw_api_resource.id
+  http_method = aws_api_gateway_method.authentication_options.http_method
+  status_code = aws_api_gateway_method_response.authentication_options_response.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+}
 
 ###############
 
@@ -107,7 +198,9 @@ resource "aws_api_gateway_deployment" "api_deployment" {
         redeployment = sha1(jsonencode([
             aws_api_gateway_resource.register_gw_api_resource.id, #add mais um
             aws_api_gateway_method.register_gw_api_method_post.id,
-            aws_api_gateway_method.authentication_gw_api_method_get.id,
+            aws_api_gateway_method.register_options.id,
+            aws_api_gateway_method.authentication_gw_api_method_post.id,
+            aws_api_gateway_method.authentication_options.id,
             aws_api_gateway_integration.register_lambda_integration_post.id,
             aws_api_gateway_integration.authentication_lambda_integration_post.id,
         ]))
