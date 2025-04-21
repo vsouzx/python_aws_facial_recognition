@@ -205,6 +205,14 @@ resource "aws_api_gateway_deployment" "api_deployment" {
     lifecycle {
       create_before_destroy = true
     }
+
+      # 👇 Adiciona os MÉTODOS (não integrações) como dependência
+    depends_on = [
+      aws_api_gateway_method.register_gw_api_method_post,
+      aws_api_gateway_method.authentication_gw_api_method_get,
+      aws_api_gateway_method.register_options,
+      aws_api_gateway_method.authentication_options
+    ]
 }
 
 resource "aws_lambda_permission" "apigw_lambda_permission" {
