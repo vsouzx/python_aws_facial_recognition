@@ -1,9 +1,10 @@
 import json
+from app.util.decimal_utils import decimal_default
 
 def no_content_response():
     return {
         'statusCode': 201,
-        'headers': headers
+        'headers': headers()
     }
     
 def default_response(status, message):
@@ -17,7 +18,7 @@ def custom_response(status, body):
     return {
         'statusCode': status,
         'headers': headers(),
-        'body': json.dumps(body)
+        'body': json.dumps(body, default=decimal_default)
     }
     
 def headers():
