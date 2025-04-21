@@ -115,6 +115,11 @@ def authenticate(event):
         
         return {
             'statusCode': 201,
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
             'body': json.dumps({
                 'identifier': identifier,
                 'name': user['name'],
