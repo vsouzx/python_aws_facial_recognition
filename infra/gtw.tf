@@ -96,10 +96,6 @@ resource "aws_api_gateway_integration_response" "register_options_integration_re
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
-
-  depends_on = [
-    aws_api_gateway_integration.register_options_integration
-  ]
 }
 
 ### AUTHENTICATE ENDPOINT ###
@@ -191,10 +187,6 @@ resource "aws_api_gateway_integration_response" "authentication_options_integrat
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
-
-  depends_on = [
-    aws_api_gateway_integration.authentication_options_integration
-  ]
 }
 
 ###############
