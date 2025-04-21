@@ -194,17 +194,8 @@ resource "aws_api_gateway_integration_response" "authentication_options_integrat
 resource "aws_api_gateway_deployment" "api_deployment" {
     rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
 
-      triggers = {
-        redeployment = sha1(jsonencode([
-            aws_api_gateway_resource.register_gw_api_resource.id, 
-            aws_api_gateway_method.register_gw_api_method_post.id,
-            aws_api_gateway_method.register_options.id,
-            aws_api_gateway_method.authentication_gw_api_method_get.id,
-            aws_api_gateway_method.authentication_options.id,
-            aws_api_gateway_integration.register_lambda_integration_post.id,
-            aws_api_gateway_integration.authentication_lambda_integration_post.id,
-            aws_api_gateway_integration.register_options_integration.id
-        ]))
+    triggers = {
+      redeployment = timestamp()
     }
 
     lifecycle {
