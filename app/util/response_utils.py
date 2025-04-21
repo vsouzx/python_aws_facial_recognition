@@ -23,6 +23,6 @@ def custom_response(status, body):
 def headers():
     return {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST'
     }
