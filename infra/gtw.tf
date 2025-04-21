@@ -209,11 +209,6 @@ resource "aws_api_gateway_deployment" "api_deployment" {
     lifecycle {
       create_before_destroy = true
     }
-
-    depends_on = [ 
-        aws_api_gateway_integration.register_lambda_integration_post,
-        aws_api_gateway_integration.authentication_lambda_integration_post
-    ]
 }
 
 resource "aws_lambda_permission" "apigw_lambda_permission" {
