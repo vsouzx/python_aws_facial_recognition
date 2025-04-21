@@ -202,7 +202,8 @@ resource "aws_api_gateway_integration_response" "authentication_options_integrat
 resource "aws_api_gateway_deployment" "api_deployment" {
     rest_api_id = aws_api_gateway_rest_api.facial_recognition_gw_api.id
 
-      triggers = timestamp()
+    triggers = timestamp()
+
 
     lifecycle {
       create_before_destroy = true
