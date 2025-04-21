@@ -1,10 +1,11 @@
 import json
 import boto3
 import os
-import base64
 from app.repository.users_repository import find_by_identifier, save_item
 from datetime import datetime
-from app.util.decimal_utils import decimal_default
+from app.util.response_utils import default_response, custom_response
+from app.util.base64_utils import validate_base64
+from app.util.rekognition_utils import is_face
 
 s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
@@ -21,15 +22,7 @@ def authenticate(event):
         photo_base64 = data.get('photo')
         
         if not all([photo_base64]):
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'Required fields: photo'})
-            }
+            return default_response(400, 'Required fields: photo')
             
         photo_bytes = validate_base64(photo_base64)
         
@@ -37,36 +30,12 @@ def authenticate(event):
             is_human_face = is_face(photo_bytes)
         except Exception as e:
             if str(e) == 'MultipleFacesException':
-                return {
-                    'statusCode': 400,
-                    'headers': {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                    },
-                    'body': json.dumps({'message': 'More than one face detected.'})
-                }
+                return default_response(400, 'More than one face detected.')
             print(f'Error in face detection: {e}')
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'Error in face detection.'})
-            }
+            return default_response(400, 'Error in face detection.')
 
         if not is_human_face:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'No human face detected or confidence too low.'})
-            }
+            return default_response(400, 'No human face detected or confidence too low.')
             
         # Buscar rosto na coleção
         response = rekognition.search_faces_by_image(
@@ -78,15 +47,7 @@ def authenticate(event):
         
         matches = response.get('FaceMatches', [])
         if not matches:
-            return {
-                'statusCode': 404,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'Nenhum rosto correspondente encontrado.'})
-            }
+            return default_response(400, 'No correspondent face found.')
 
         match = matches[0]
         identifier = match['Face']['ExternalImageId']
@@ -97,15 +58,7 @@ def authenticate(event):
         user = result.get('Item')
 
         if not user:
-            return {
-                'statusCode': 404,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'Usuário não encontrado no dynamodb'})
-            }
+            return default_response(400, 'User not found in dynamodb.')
 
         # Atualizar quantidade de acessos e última data
         user['access_count'] = user.get('access_count', 0) + 1
@@ -113,65 +66,13 @@ def authenticate(event):
 
         save_item(user)
         
-        return {
-            'statusCode': 201,
-            'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps({
+        return custom_response(201, {
                 'identifier': identifier,
                 'name': user['name'],
                 'last_name': user['last_name'],
                 'email': user['email'],
                 'access_count': user['access_count'],
                 'confidence': confidence
-            }, default=decimal_default)
-        }
+            })
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-            'body': json.dumps({'message': f'Erro while authenticating user: {e}'})
-        }
-  
-def validate_base64(photo_base64):
-    if ',' in photo_base64:
-        photo_base64 = photo_base64.split(',')[1]
-
-    try:
-        return base64.b64decode(photo_base64)
-    except Exception as e:
-        print(f'Erro ao validar base64 {e}')
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps({'message': 'Invalid base64.'})
-        }
-
-def is_face(photo_bytes):
-    response = rekognition.detect_faces(
-        Image={'Bytes': photo_bytes},
-        Attributes=['ALL']
-    )
-    
-    print(f'Response deteccao face: {response}')
-    faces = response.get('FaceDetails', [])
-
-    print(f'Faces: {response}')
-    if not faces:
-        return False
-
-    if len(faces) > 1:
-        raise Exception('MultipleFacesException')
-
-    return faces[0]['Confidence'] > 90
+        return default_response(500, f'Erro while authenticating user: {e}')

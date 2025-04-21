@@ -2,10 +2,12 @@ import uuid
 import json
 import boto3
 import os
-import base64
 from app.repository.users_repository import save_item
 from datetime import datetime
 from botocore.exceptions import ClientError
+from app.util.response_utils import no_content_response, default_response
+from app.util.base64_utils import validate_base64
+from app.util.rekognition_utils import is_face
 
 s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
@@ -29,15 +31,7 @@ def register_new_user(event):
         photo_base64 = data.get('photo')
 
         if not all([name, last_name, email, photo_base64]):
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'Required fields: name, last_name, email and photo'})
-            }
+            return default_response(400, 'Required fields: name, last_name, email and photo')
 
         photo_bytes = validate_base64(photo_base64)
 
@@ -45,36 +39,11 @@ def register_new_user(event):
             is_human_face = is_face(photo_bytes)
         except Exception as e:
             if str(e) == "MultipleFacesException":
-                return {
-                    'statusCode': 400,
-                    'headers': {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                    },
-                    'body': json.dumps({'message': 'More than one face detected.'})
-                }
-            print(f'Error in face detection: {e}')
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'Error in face detection.'})
-            }
+                return default_response(400, 'More than one face detected.')
+            return default_response(400, f'Error in face detection: {e}')
 
         if not is_human_face:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': 'No human face detected or confidence too low.'})
-            }
+            return default_response(400, 'No human face detected or confidence too low.')
             
         identifier = str(uuid.uuid4())
 
@@ -98,25 +67,9 @@ def register_new_user(event):
             'access_count': 0
         })
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps({'message': 'User created'})
-        }
+        return no_content_response()
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps({'message': f'Erro while saving new user: {e}'})
-        }
+        return default_response(500, f'Erro while saving new user: {e}')
   
 def index_faces(identifier):
     try:
@@ -132,63 +85,11 @@ def index_faces(identifier):
             DetectionAttributes=['ALL']
         )
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps({'message': f'Error indexing face: {e}'})
-        }
+        return default_response(500, f'Error indexing face: {e}')
               
 def create_collection_if_not_exists():
     try:
         rekognition.create_collection(CollectionId=collection_id)
     except ClientError as e:
         if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
-            return {
-                'statusCode': 500,
-                'headers': {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                },
-                'body': json.dumps({'message': f'Error creating collection: {e}'})
-            }
-
-def validate_base64(photo_base64):
-    if ',' in photo_base64:
-        photo_base64 = photo_base64.split(',')[1]
-
-    try:
-        return base64.b64decode(photo_base64)
-    except Exception as e:
-        print(f'Erro ao validar base64 {e}')
-        return {
-            'statusCode': 400,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            'body': json.dumps({'message': 'Invalid base64.'})
-        }
-
-def is_face(photo_bytes):
-    response = rekognition.detect_faces(
-        Image={'Bytes': photo_bytes},
-        Attributes=['ALL']
-    )
-    
-    print(f'Response deteccao face: {response}')
-    faces = response.get('FaceDetails', [])
-
-    print(f'Faces: {response}')
-    if not faces:
-        return False
-
-    if len(faces) > 1:
-        raise Exception('MultipleFacesException')
-
-    return faces[0]['Confidence'] > 90
+            return default_response(500, f'Error creating collection: {e}')
