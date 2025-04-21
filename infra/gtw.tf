@@ -186,7 +186,7 @@ resource "aws_api_gateway_integration_response" "authentication_options_integrat
 
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type'"
-    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST,GET'"
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
 
