@@ -206,13 +206,11 @@ resource "aws_api_gateway_deployment" "api_deployment" {
       create_before_destroy = true
     }
 
-      # 👇 Adiciona os MÉTODOS (não integrações) como dependência
-    depends_on = [
-      aws_api_gateway_method.register_gw_api_method_post,
-      aws_api_gateway_method.authentication_gw_api_method_post,
-      aws_api_gateway_method.register_options,
-      aws_api_gateway_method.authentication_options
-    ]
+    # 👇 Adiciona os MÉTODOS (não integrações) como dependência
+    depends_on = [ 
+         aws_api_gateway_integration.register_lambda_integration_post,
+         aws_api_gateway_integration.authentication_lambda_integration_post
+     ]
 }
 
 resource "aws_lambda_permission" "apigw_lambda_permission" {
