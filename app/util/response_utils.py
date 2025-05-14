@@ -1,7 +1,10 @@
 import json
-from app.util.DecimalUtils import DecimalUtils
+from app.util.decimal_utils import DecimalUtils
 
 class ResponseUtils:
+
+    def __init__(self):
+        self.decimal_utils = DecimalUtils()
 
     def no_content_response(self):
         return {
@@ -20,7 +23,7 @@ class ResponseUtils:
         return {
             'statusCode': status,
             'headers': self.headers(),
-            'body': json.dumps(body, default=DecimalUtils.decimal_default)
+            'body': json.dumps(body, default=self.decimal_utils.decimal_default)
         }
     
     def headers():

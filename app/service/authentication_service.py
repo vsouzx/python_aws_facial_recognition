@@ -1,19 +1,20 @@
 import json
 import os
 from datetime import datetime
-from app.config import DynamoDBClient, BucketS3Client, RekognitionClient
-from app.repository import DynamoRepository
-from app.util import ResponseUtils, Base64Utils, RekognitionUtils
+from app.config.buckets3_client import BucketS3Client
+from app.config.rekognition_client import RekognitionClient
+from app.repository.dynamo_repository import DynamoRepository
+from app.util.response_utils import ResponseUtils
+from app.util.base64_utils import Base64Utils
+from app.util.rekognition_utils import RekognitionUtils
 
 class AuthenticationService:
     
     def __init__(self):
         self.user_repository = DynamoRepository(os.environ['DYNAMODB_TABLE'])
-        self.s3_client = BucketS3Client
-        self.rekognition_client = RekognitionClient
-        self.response_utils = ResponseUtils
-        self.base64_utils = Base64Utils
-        self.rekognition_utils = RekognitionUtils
+        self.response_utils = ResponseUtils()
+        self.base64_utils = Base64Utils()
+        self.rekognition_utils = RekognitionUtils()
         self.bucket_name = os.environ['BUCKET_NAME']
         self.collection_id = os.environ['COLLECTION_ID']
 
@@ -38,7 +39,7 @@ class AuthenticationService:
             if not is_human_face:
                 return self.response_utils.default_response(400, 'No human face detected or confidence too low.')
             
-            response = self.rekognition_client.search_faces_by_image(
+            response = self.RekognitionClient().client.search_faces_by_image(
                 CollectionId=self.collection_id,
                 Image={'Bytes': photo_bytes},
                 FaceMatchThreshold=90,
@@ -75,3 +76,6 @@ class AuthenticationService:
             )
         except Exception as e:
             return self.response_utils.default_response(500, f'Erro while authenticating user: {e}')
+
+    def description(self):
+        return "register_service"

@@ -1,9 +1,12 @@
-from app.config.RekognitionClient import RekognitionClient
+from app.config.rekognition_client import RekognitionClient
 
 class RekognitionUtils:
     
+    def __init__(self):
+        self.rekognition_client = RekognitionClient().get_client()
+
     def is_face(self, photo_bytes):
-        response = RekognitionClient.detect_faces(
+        response = self.rekognition_client.detect_faces(
             Image={'Bytes': photo_bytes},
             Attributes=['ALL']
         )

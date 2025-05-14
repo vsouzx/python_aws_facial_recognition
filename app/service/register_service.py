@@ -2,24 +2,31 @@ import uuid
 import json
 import os
 from datetime import datetime
-from app.config import BucketS3Client, RekognitionClient, DynamoDBClient
-from app.repository.DynamoRepository import DynamoRepository
-from app.util import ResponseUtils, Base64Utils, RekognitionUtils
+from app.config.buckets3_client import BucketS3Client
+from app.config.rekognition_client import RekognitionClient
+from app.repository.dynamo_repository import DynamoRepository
+from app.util.response_utils import ResponseUtils
+from app.util.base64_utils import Base64Utils
+from app.util.rekognition_utils import RekognitionUtils
 from botocore.exceptions import ClientError
 
 class RegisterService:
     
     def __init__(self):
-        self.s3_client = BucketS3Client.get_client()
-        self.rekognition = RekognitionClient.get_client()
-        self.repository = DynamoRepository(os.environ["DYNAMODB_TABLE"])
-        self.response_utils = ResponseUtils
-        self.base64_utils = Base64Utils
-        self.rekognition_utils = RekognitionUtils
-        self.bucket_name = os.environ['BUCKET_NAME']
-        self.collection_id = os.environ['COLLECTION_ID']
+        print('dentro do construtor')
+        try:
+            self.repository = DynamoRepository(os.environ["DYNAMODB_TABLE"])
+            self.response_utils = ResponseUtils()
+            self.base64_utils = Base64Utils()
+            self.rekognition_utils = RekognitionUtils()
+            self.bucket_name = os.environ['BUCKET_NAME']
+            self.collection_id = os.environ['COLLECTION_ID']
+        except Exception as e:
+            print(f'Erro durante init: {e}')
+            raise e  # opcional: relança o erro para não mascarar problemas
 
-    def registerNewUser(self, event):
+    def register_new_user(self, event):
+        print('dentro do register_new_user')
         try:
             data = json.loads(event['body'])
     
@@ -27,6 +34,8 @@ class RegisterService:
             last_name = data.get('last_name')
             email = data.get('email')
             photo_base64 = data.get('photo')
+
+            print(f'params: {name}, {last_name}, {email}, {photo_base64}')
 
             if not all([name, last_name, email, photo_base64]):
                 return self.response_utils.default_response(400, 'Required fields: name, last_name, email and photo')
@@ -45,7 +54,7 @@ class RegisterService:
             
             identifier = str(uuid.uuid4())
 
-            self.s3_client.put_object(
+            self.BucketS3Client().client.put_object(
                 Bucket=self.bucket_name,
                 Key=identifier,
                 Body=photo_bytes,
@@ -71,7 +80,7 @@ class RegisterService:
 
     def index_faces(self, identifier: str):
         try:
-            self.rekognition.index_faces(
+            self.RekognitionClient().clientRekognition.index_faces(
                 CollectionId=self.collection_id,
                 Image={
                     'S3Object': {
@@ -87,7 +96,10 @@ class RegisterService:
               
     def create_collection_if_not_exists(self):
         try:
-            self.rekognition.create_collection(CollectionId=self.collection_id)
+            self.RekognitionClient().clientRekognition.create_collection(CollectionId=self.collection_id)
         except ClientError as e:
             if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
                 return self.response_utils.default_response(500, f'Error creating collection: {e}')
+
+    def description(self):
+        return "register_service"
