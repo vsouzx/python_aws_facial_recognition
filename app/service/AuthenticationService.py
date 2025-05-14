@@ -7,18 +7,13 @@ from app.util import ResponseUtils, Base64Utils, RekognitionUtils
 
 class AuthenticationService:
     
-    def __init__(self, dynamodb_client: DynamoDBClient,
-                 s3_client: BucketS3Client,
-                 rekognition_client: RekognitionClient,
-                 response_utils: ResponseUtils,
-                 base64_utils: Base64Utils,
-                 rekognition_utils: RekognitionUtils):
-        self.user_repository = DynamoRepository(dynamodb_client, os.environ['DYNAMODB_TABLE'])
-        self.s3_client = s3_client
-        self.rekognition_client = rekognition_client
-        self.response_utils = response_utils
-        self.base64_utils = base64_utils
-        self.rekognition_utils = rekognition_utils
+    def __init__(self):
+        self.user_repository = DynamoRepository(os.environ['DYNAMODB_TABLE'])
+        self.s3_client = BucketS3Client
+        self.rekognition_client = RekognitionClient
+        self.response_utils = ResponseUtils
+        self.base64_utils = Base64Utils
+        self.rekognition_utils = RekognitionUtils
         self.bucket_name = os.environ['BUCKET_NAME']
         self.collection_id = os.environ['COLLECTION_ID']
 

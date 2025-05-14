@@ -3,10 +3,9 @@ from app.service import RegisterService
 
 class RegisterHandler(HandlerStrategy):
     
-    def __init__(self, register_service: RegisterService):
-        super().__init__()
-        self.register_service = register_service
+    def __init__(self):
+        super()
     
     def handle(self, event):
-        return self.register_service(event)
+        return RegisterService.registerNewUser(event)
              

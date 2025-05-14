@@ -9,18 +9,13 @@ from botocore.exceptions import ClientError
 
 class RegisterService:
     
-    def __init__(self, s3_client: BucketS3Client, 
-                 rekognition_client: RekognitionClient,
-                 dynamodb_client: DynamoDBClient,
-                 response_utils: ResponseUtils,
-                 base64_utils: Base64Utils,
-                 rekognition_utils: RekognitionUtils):
-        self.s3_client = s3_client.get_client()
-        self.rekognition = rekognition_client.get_client()
-        self.repository = DynamoRepository(dynamodb_client, os.environ["DYNAMODB_TABLE"])
-        self.response_utils = response_utils
-        self.base64_utils = base64_utils
-        self.rekognition_utils = rekognition_utils
+    def __init__(self):
+        self.s3_client = BucketS3Client.get_client()
+        self.rekognition = RekognitionClient.get_client()
+        self.repository = DynamoRepository(os.environ["DYNAMODB_TABLE"])
+        self.response_utils = ResponseUtils
+        self.base64_utils = Base64Utils
+        self.rekognition_utils = RekognitionUtils
         self.bucket_name = os.environ['BUCKET_NAME']
         self.collection_id = os.environ['COLLECTION_ID']
 
