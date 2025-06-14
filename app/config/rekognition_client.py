@@ -1,6 +1,6 @@
 import boto3
 
-class BucketS3Client:
+class RekognitionClient:
     
     def __init__(self):
         print('dentro cosntrutor s3 client')

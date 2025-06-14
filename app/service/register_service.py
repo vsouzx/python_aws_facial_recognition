@@ -54,7 +54,7 @@ class RegisterService:
             
             identifier = str(uuid.uuid4())
 
-            self.BucketS3Client().client.put_object(
+            BucketS3Client().client.put_object(
                 Bucket=self.bucket_name,
                 Key=identifier,
                 Body=photo_bytes,
@@ -80,7 +80,7 @@ class RegisterService:
 
     def index_faces(self, identifier: str):
         try:
-            self.RekognitionClient().clientRekognition.index_faces(
+            RekognitionClient().clientRekognition.index_faces(
                 CollectionId=self.collection_id,
                 Image={
                     'S3Object': {
@@ -96,7 +96,7 @@ class RegisterService:
               
     def create_collection_if_not_exists(self):
         try:
-            self.RekognitionClient().clientRekognition.create_collection(CollectionId=self.collection_id)
+            RekognitionClient().clientRekognition.create_collection(CollectionId=self.collection_id)
         except ClientError as e:
             if e.response['Error']['Code'] != 'ResourceAlreadyExistsException':
                 return self.response_utils.default_response(500, f'Error creating collection: {e}')
